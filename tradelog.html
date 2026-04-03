@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -127,7 +128,15 @@ tr:last-child td{border-bottom:none}tbody tr{transition:background .1s}tbody tr:
 .td-actions{display:flex;gap:4px}
 .act-btn{background:transparent;border:none;color:var(--text3);cursor:pointer;padding:4px;border-radius:4px;display:flex;align-items:center;transition:all .15s}
 .act-btn:hover{background:var(--bg4);color:var(--text)}.act-btn.del:hover{color:var(--red)}.act-btn svg{width:13px;height:13px}
-.note-preview{font-size:11px;color:var(--text3);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.note-preview{font-size:11px;color:var(--text3);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;text-decoration:underline dotted}
+.note-preview:hover{color:var(--accent2)}
+/* NOTE MODAL */
+.note-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.note-modal.open{opacity:1;pointer-events:all}
+.note-modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);width:92vw;max-width:520px;padding:22px;position:relative}
+.note-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.note-modal-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.note-modal-body{font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;max-height:60vh;overflow-y:auto}
 .empty-state{text-align:center;padding:50px 20px;color:var(--text3)}
 .empty-state svg{width:36px;height:36px;margin-bottom:10px;opacity:.3}.empty-state p{font-size:13px}
 /* DRAWER */
@@ -402,8 +411,13 @@ tr:last-child td{border-bottom:none}tbody tr{transition:background .1s}tbody tr:
 <div class="modal-overlay" id="day-modal" onclick="if(event.target===this)closeDayModal()"><div class="modal-box" style="max-width:520px"><div class="modal-head"><div class="modal-head-meta" id="day-modal-head"></div><button class="drawer-close" onclick="closeDayModal()">×</button></div><div class="day-detail-content" id="day-detail-content"></div></div></div>
 <div class="pair-modal" id="pair-modal" onclick="if(event.target===this)closePairModal()"><div class="pair-modal-box"><div class="pair-modal-title">Parite Ekle</div><div class="pair-input-row"><input type="text" id="new-pair-input" placeholder="ETHUSDT" maxlength="20" onkeydown="if(event.key==='Enter')addPair()"><button class="btn btn-primary" onclick="addPair()">Ekle</button></div></div></div>
 <div class="fullscreen-overlay" id="fullscreen-overlay" onclick="closeFullscreen()"><img id="fullscreen-img" src="" alt=""></div>
-
-<script>
+<!-- NOTE MODAL -->
+<div class="note-modal" id="note-modal" onclick="if(event.target===this)closeNoteModal()">
+  <div class="note-modal-box">
+    <div class="note-modal-head"><div class="note-modal-meta" id="note-modal-meta"></div><button class="drawer-close" onclick="closeNoteModal()">×</button></div>
+    <div class="note-modal-body" id="note-modal-body"></div>
+  </div>
+</div>
 // ==================== SUPABASE ====================
 const SUPA_URL = 'https://mdlicitgdxmmgrfjygpg.supabase.co';
 const SUPA_KEY = 'sb_publishable_tf0lYRSFyLW85jNLwtpJ2Q_Bxogt3j2';
@@ -638,7 +652,7 @@ function renderTable(){
     html+=`<tr class="day-group-row"><td colspan="10"><div class="day-group-header"><span class="day-group-date">${d}.${m}.${y}</span><span class="day-group-day">${DAYS[new Date(date+'T00:00:00').getDay()]}</span><div class="day-group-pills"><span class="day-pill">${dt.length} işlem</span>${w?`<span class="day-pill green">${w}W</span>`:''}${l?`<span class="day-pill red">${l}L</span>`:''}${be?`<span class="day-pill yellow">${be}BE</span>`:''}<span class="day-pill ${dRR>=0?'green':'red'}">${dRR>=0?'+':''}${dRR.toFixed(2)}R</span></div></div></td></tr>`;
     dt.forEach(t=>{
       const rrVal=t.rr?`<span class="td-rr ${parseFloat(t.rr)>=0?'pos':'neg'}">${parseFloat(t.rr)>=0?'+':''}${parseFloat(t.rr).toFixed(2)}R</span>`:`<span style="color:var(--text3)">—</span>`;
-      html+=`<tr><td><div class="td-time">${t.time||'—'}</div></td><td><span class="td-pair">${t.pair}</span></td><td><span class="td-dir ${t.dir}">${t.dir==='long'?'▲ L':'▼ S'}</span></td><td>${rrVal}</td><td><span class="td-result ${t.result}">${t.result.toUpperCase()}</span></td><td><div class="td-tags">${(t.tags||[]).map(tag=>`<span class="tag-chip">${tag}</span>`).join('')}</div></td><td><div class="td-tags">${(t.tfs||[]).map(tf=>`<span class="tag-chip tf">${tf}</span>`).join('')}</div></td><td><div class="note-preview" title="${(t.note||'').replace(/"/g,"'")}">${t.note||'—'}</div></td><td>${t.tradeImg?`<button class="td-img-btn" onclick="openImgModal(${t.id})">📷</button>`:'<span style="color:var(--text3);font-size:11px">—</span>'}</td><td><div class="td-actions"><button class="act-btn" onclick="editTrade(${t.id})"><svg viewBox="0 0 16 16" fill="none"><path d="M11 3l2 2-8 8H3v-2L11 3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button><button class="act-btn del" onclick="deleteTrade(${t.id})"><svg viewBox="0 0 16 16" fill="none"><path d="M3 5h10M6 5V3h4v2M7 8v4M9 8v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></div></td></tr>`;
+      html+=`<tr><td><div class="td-time">${t.time||'—'}</div></td><td><span class="td-pair">${t.pair}</span></td><td><span class="td-dir ${t.dir}">${t.dir==='long'?'▲ L':'▼ S'}</span></td><td>${rrVal}</td><td><span class="td-result ${t.result}">${t.result.toUpperCase()}</span></td><td><div class="td-tags">${(t.tags||[]).map(tag=>`<span class="tag-chip">${tag}</span>`).join('')}</div></td><td><div class="td-tags">${(t.tfs||[]).map(tf=>`<span class="tag-chip tf">${tf}</span>`).join('')}</div></td><td>${t.note?`<div class="note-preview" onclick="openNoteModal(${t.id})" title="Notu görüntüle">${t.note}</div>`:'<span style="color:var(--text3);font-size:11px">—</span>'}</td><td>${t.tradeImg?`<button class="td-img-btn" onclick="openImgModal(${t.id})">📷</button>`:'<span style="color:var(--text3);font-size:11px">—</span>'}</td><td><div class="td-actions"><button class="act-btn" onclick="editTrade(${t.id})"><svg viewBox="0 0 16 16" fill="none"><path d="M11 3l2 2-8 8H3v-2L11 3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg></button><button class="act-btn del" onclick="deleteTrade(${t.id})"><svg viewBox="0 0 16 16" fill="none"><path d="M3 5h10M6 5V3h4v2M7 8v4M9 8v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></div></td></tr>`;
     });
   });
   tbody.innerHTML=html;
@@ -810,14 +824,23 @@ async function saveTrade(){
   let rr=null;
   const valid=FS.exits.filter(e=>e.rr!==null&&e.pct&&parseFloat(e.pct)>0);
   if(valid.length){
+    // Kısmi exit varsa — ağırlıklı hesapla
     const totalPct=valid.reduce((s,e)=>s+parseFloat(e.pct),0);
     const remPct=Math.max(0,100-totalPct);
     let ws=valid.reduce((s,e)=>s+(e.rr*parseFloat(e.pct)),0);
     if(remPct>0){const remRR=getRemRR()??-1;ws+=remRR*remPct;}
     rr=(ws/100).toFixed(2);
-  } else if(entry&&sl&&tp){
-    const ev=parseFloat(entry),sv=parseFloat(sl),tv=parseFloat(tp);
-    if(!isNaN(ev)&&!isNaN(sv)&&!isNaN(tv)&&sv!==ev)rr=(Math.abs(tv-ev)/Math.abs(sv-ev)).toFixed(2);
+  } else {
+    // Kısmi exit yok — sonuç seçimine göre hesapla
+    if(FS.result==='be'){
+      rr='0.00';
+    } else if(FS.result==='loss'){
+      rr='-1.00';
+    } else if(FS.result==='win'&&entry&&sl&&tp){
+      // WIN: TP'ye göre hesapla
+      const ev=parseFloat(entry),sv=parseFloat(sl),tv=parseFloat(tp);
+      if(!isNaN(ev)&&!isNaN(sv)&&!isNaN(tv)&&sv!==ev)rr=(Math.abs(tv-ev)/Math.abs(sv-ev)).toFixed(2);
+    }
   }
   const td={pair,date,time,entry,sl,tp,rr,note,dir:FS.dir,result:FS.result,tags:[...FS.tags],tfs:[...FS.tfs],exits:FS.exits.map(e=>({price:e.price,pct:e.pct,rr:e.rr,remaining:e.remaining})),tradeImg:FS.tradeImg};
   isSaving=true;
@@ -892,6 +915,13 @@ function openImgModal(id){
 function closeImgModal(){document.getElementById('img-modal').classList.remove('open');}
 function openFullscreen(src){document.getElementById('fullscreen-img').src=src;document.getElementById('fullscreen-overlay').classList.add('open');}
 function closeFullscreen(){document.getElementById('fullscreen-overlay').classList.remove('open');}
+function openNoteModal(id){
+  const t=S.trades.find(t=>t.id===id);if(!t||!t.note)return;
+  document.getElementById('note-modal-meta').innerHTML=`<span style="font-family:var(--mono);font-size:13px;font-weight:700">${t.pair}</span><span class="td-dir ${t.dir}">${t.dir==='long'?'▲ LONG':'▼ SHORT'}</span><span class="td-result ${t.result}">${t.result.toUpperCase()}</span>${t.rr?`<span style="font-family:var(--mono);font-size:13px;font-weight:600;color:${parseFloat(t.rr)>=0?'var(--green)':'var(--red)'}">${parseFloat(t.rr)>=0?'+':''}${parseFloat(t.rr).toFixed(2)}R</span>`:''}<span style="font-size:11px;color:var(--text3)">${t.date} ${t.time||''}</span>`;
+  document.getElementById('note-modal-body').textContent=t.note;
+  document.getElementById('note-modal').classList.add('open');
+}
+function closeNoteModal(){document.getElementById('note-modal').classList.remove('open');}
 function openDrawer(){document.getElementById('drawer-overlay').classList.add('open');document.getElementById('trade-drawer').classList.add('open');}
 function closeDrawer(){document.getElementById('drawer-overlay').classList.remove('open');document.getElementById('trade-drawer').classList.remove('open');}
 
@@ -903,7 +933,7 @@ function exportCSV(){
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`tradelog_${S.activePair}_${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url);
 }
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeImgModal();closeTagModal();closeFullscreen();closeDayModal();document.getElementById('pair-modal').classList.remove('open');}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeImgModal();closeTagModal();closeFullscreen();closeDayModal();closeNoteModal();document.getElementById('pair-modal').classList.remove('open');}});
 </script>
 </body>
 </html>
