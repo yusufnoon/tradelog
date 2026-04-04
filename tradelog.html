@@ -76,7 +76,7 @@ html{font-size:14px}body{background:var(--bg);color:var(--text);font-family:var(
 .pair-badge{background:var(--accent);color:#fff;font-family:var(--mono);font-size:11px;font-weight:500;padding:3px 10px;border-radius:99px}
 .topbar-right{display:flex;align-items:center;gap:8px}
 .btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;border:none;font-family:var(--body)}
-.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#6a4ee0}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#009966}
 .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}.btn-ghost:hover{background:var(--bg3);color:var(--text)}
 .btn-sm{padding:5px 10px;font-size:11px}.btn svg{width:13px;height:13px}
 /* CONTENT */
@@ -556,7 +556,7 @@ let S={
 };
 let FS={dir:'long',result:'win',tags:[],tfs:[],tradeImg:null,exits:[]};
 let editId=null,charts={},calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
-let isSaving=false;
+let isSaving=false,detailTradeId=null;
 const MONTHS=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 const DAYS=['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
 const DAYS_S=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
@@ -602,8 +602,9 @@ async function loadFromSupabase(){
       riskR:parseFloat(t.risk_r)||1
     }));
   } catch(e){
-    console.error(e);
-    toast('Veri yüklenemedi: '+e.message,'error');
+    console.error('loadFromSupabase error:',e);
+    const msg=e?.message||e?.error_description||JSON.stringify(e)||'Bilinmeyen hata';
+    toast('Veri yüklenemedi: '+msg,'error');
   }
 }
 
@@ -768,7 +769,9 @@ async function addPair(){
   await saveSettings();renderAll();closePairModal();
   // Journal modunda drawer açıksa dropdown'ı güncelle
   if(S.appMode==='journal'&&document.getElementById('trade-drawer').classList.contains('open')){
-    refreshDrawerPairDropdown(v);
+    const pairList=S.journalPairs;
+    document.getElementById('f-pair').innerHTML=pairList.map(p=>`<option value="${p}" ${p===v?'selected':''}>${p}</option>`).join('');
+    renderJournalPairFilter();
   }
 }
 // Drawer açıkken inline parite ekle
@@ -854,10 +857,10 @@ function renderStats(){
 function dc(k){if(charts[k]){try{charts[k].destroy();}catch(e){}delete charts[k];}}
 function renderCharts(){
   const trades=getFiltered().slice().sort((a,b)=>a.date.localeCompare(b.date));
-  let cum=0;const eq=trades.map(t=>{cum+=parseFloat(t.rr)||0;return+cum.toFixed(2);});
-  const eqL=trades.map(t=>t.date.slice(5));
-  const eqC=eq.length&&eq[eq.length-1]>=0?'#00d48a':'#ff4d6a';
-  const eqRGB=eqC==='#00d48a'?'0,212,138':'255,77,106';
+  let cum=0;const eq=[0,...trades.map(t=>{cum+=parseFloat(t.rr)||0;return+cum.toFixed(2);})];
+  const eqL=['',...trades.map(t=>t.date.slice(5))];
+  const eqC=eq.length&&eq[eq.length-1]>=0?'#00b377':'#ff4d6a';
+  const eqRGB=eqC==='#00b377'?'0,179,119':'255,77,106';
   const mkEq=(id,showX)=>{const el=document.getElementById(id);if(!el)return;dc(id);charts[id]=new Chart(el,{type:'line',data:{labels:eqL.length?eqL:[''],datasets:[{data:eq.length?eq:[0],borderColor:eqC,borderWidth:2,fill:true,backgroundColor:(ctx)=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,ctx.chart.height);g.addColorStop(0,`rgba(${eqRGB},.2)`);g.addColorStop(1,`rgba(${eqRGB},0)`);return g;},tension:.4,pointRadius:eq.length<20?3:0,pointHoverRadius:4,pointBackgroundColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw>=0?'+':''}${c.raw}R`}}},scales:{x:{display:showX,grid:{color:'#2a2a32'},ticks:{color:'#9090a0',font:{size:10}}},y:{display:true,grid:{color:'#2a2a32'},ticks:{color:'#55556a',font:{family:"'DM Mono'",size:10},callback:v=>parseFloat(v).toFixed(2)+'R'}}}}});};
   mkEq('equity-chart',false);mkEq('equity-chart2',true);
   const el2=document.getElementById('dist-chart');
@@ -889,9 +892,14 @@ function renderTable(){
 
 // ==================== MONTHLY ====================
 function renderMonthly(){
-  const pt=S.appMode==='backtest'
-    ?S.trades.filter(t=>t.pair===S.activePair&&t.tradeType==='backtest')
-    :S.trades.filter(t=>t.tradeType==='journal');
+  let pt;
+  if(S.appMode==='backtest'){
+    pt=S.trades.filter(t=>t.pair===S.activePair&&t.tradeType==='backtest');
+    if(S.activeSession!==null)pt=pt.filter(t=>t.sessionId===S.activeSession);
+  } else {
+    pt=S.trades.filter(t=>t.tradeType==='journal');
+    if(S.filterJournalPair!=='all')pt=pt.filter(t=>t.pair===S.filterJournalPair);
+  }
   const mm={};
   pt.forEach(t=>{const k=t.date.slice(0,7);if(!mm[k])mm[k]={rr:0,wins:0,losses:0,be:0,total:0};mm[k].total++;mm[k].rr+=parseFloat(t.rr)||0;if(t.result==='win')mm[k].wins++;else if(t.result==='loss')mm[k].losses++;else mm[k].be++;});
   const keys=Object.keys(mm).sort((a,b)=>b.localeCompare(a));
@@ -996,6 +1004,8 @@ function openAddTrade(){
   const today=new Date().toISOString().slice(0,10),now=new Date().toTimeString().slice(0,5);
   document.getElementById('f-date').value=today;
   document.getElementById('f-time').value=S.appMode==='journal'?now:'';
+  const optLabel=document.getElementById('date-optional-label');
+  if(optLabel)optLabel.style.display=S.appMode==='backtest'?'':'none';
   document.getElementById('f-entry').value='';document.getElementById('f-sl').value='';document.getElementById('f-tp').value='';document.getElementById('f-note').value='';
   document.getElementById('f-risk-r').value='1';updateRiskPresetButtons(1);
   const pairList=S.appMode==='journal'?S.journalPairs:S.pairs;
@@ -1015,6 +1025,8 @@ function editTrade(id){
   editId=id;FS={dir:t.dir,result:t.result,tags:[...(t.tags||[])],tfs:[...(t.tfs||[])],tradeImg:t.tradeImg||null,exits:(t.exits||[]).map(e=>({...e,_id:'e'+Date.now()+'_'+Math.random()})),riskR:t.riskR||1};
   document.getElementById('drawer-title').textContent='İşlem Düzenle';
   document.getElementById('f-date').value=t.date;document.getElementById('f-time').value=t.time||'';
+  const optLabel2=document.getElementById('date-optional-label');
+  if(optLabel2)optLabel2.style.display=S.appMode==='backtest'?'':'none';
   document.getElementById('f-entry').value=t.entry||'';document.getElementById('f-sl').value=t.sl||'';document.getElementById('f-tp').value=t.tp||'';document.getElementById('f-note').value=t.note||'';
   document.getElementById('f-risk-r').value=t.riskR||1;updateRiskPresetButtons(t.riskR||1);
   const pairList=S.appMode==='journal'?S.journalPairs:S.pairs;
@@ -1094,7 +1106,9 @@ function updateWeightedRR(){
 async function saveTrade(){
   if(isSaving)return;
   const pair=document.getElementById('f-pair').value,date=document.getElementById('f-date').value;
-  if(!date||!pair)return;
+  if(!pair)return;
+  if(S.appMode==='journal'&&!date)return; // Journal'da tarih zorunlu, backtest'te değil
+  const finalDate=date||new Date().toISOString().slice(0,10); // Backtest'te tarih yoksa bugünü kullan
   const time=document.getElementById('f-time').value,entry=document.getElementById('f-entry').value,sl=document.getElementById('f-sl').value,tp=document.getElementById('f-tp').value,note=document.getElementById('f-note').value;
   let rr=null;
   const valid=FS.exits.filter(e=>e.rr!==null&&e.pct&&parseFloat(e.pct)>0);
@@ -1112,7 +1126,7 @@ async function saveTrade(){
       if(!isNaN(ev)&&!isNaN(sv)&&!isNaN(tv)&&sv!==ev)rr=(Math.abs(tv-ev)/Math.abs(sv-ev)).toFixed(2);
     }
   }
-  const td={pair,date,time,entry,sl,tp,rr,note,dir:FS.dir,result:FS.result,tags:[...FS.tags],tfs:[...FS.tfs],exits:FS.exits.map(e=>({price:e.price,pct:e.pct,rr:e.rr,remaining:e.remaining})),tradeImg:FS.tradeImg,tradeType:S.appMode,riskR:FS.riskR||1};
+  const td={pair,date:finalDate,time,entry,sl,tp,rr,note,dir:FS.dir,result:FS.result,tags:[...FS.tags],tfs:[...FS.tfs],exits:FS.exits.map(e=>({price:e.price,pct:e.pct,rr:e.rr,remaining:e.remaining})),tradeImg:FS.tradeImg,tradeType:S.appMode,riskR:FS.riskR||1};
   isSaving=true;
   const btn=document.getElementById('save-btn');btn.textContent='Kaydediliyor...';btn.disabled=true;
   try{
@@ -1163,7 +1177,6 @@ function updateRiskPresetButtons(val){
 }
 
 // ==================== TRADE DETAIL MODAL ====================
-let detailTradeId=null;
 function openTradeDetail(id){
   const t=S.trades.find(t=>t.id===id);if(!t)return;
   detailTradeId=id;
@@ -1202,8 +1215,8 @@ function openTradeDetail(id){
   document.getElementById('trade-detail-modal').classList.add('open');
 }
 function closeTradeDetail(){document.getElementById('trade-detail-modal').classList.remove('open');detailTradeId=null;}
-function editFromDetail(){closeTradeDetail();if(detailTradeId!==null)editTrade(detailTradeId);}
-function deleteFromDetail(){if(detailTradeId!==null){deleteTrade(detailTradeId);closeTradeDetail();}}
+function editFromDetail(){const id=detailTradeId;closeTradeDetail();if(id!==null)editTrade(id);}
+function deleteFromDetail(){if(detailTradeId!==null)deleteTrade(detailTradeId);}
 function toggleNoteTemplate(){document.getElementById('note-tmpl-box').classList.toggle('show');}
 function applyTemplate(){
   const r=document.getElementById('tmpl-reason').value.trim(),e=document.getElementById('tmpl-expect').value.trim(),l=document.getElementById('tmpl-lesson').value.trim();
@@ -1253,7 +1266,8 @@ function exportCSV(){
   const trades=getFiltered().slice().sort((a,b)=>a.date.localeCompare(b.date));
   const rows=trades.map(t=>[t.date,t.time||'',t.pair,t.dir,t.entry||'',t.sl||'',t.tp||'',t.rr||'',t.result,(t.tags||[]).join(';'),(t.tfs||[]).join(';'),(t.note||'').replace(/,/g,' ')]);
   const csv=[['Tarih','Saat','Parite','Yön','Entry','SL','TP','RR','Sonuç','Setup','TF','Not'],...rows].map(r=>r.join(',')).join('\n');
-  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`tradelog_${S.activePair}_${new Date().toISOString().slice(0,10)}.csv`;a.click();URL.revokeObjectURL(url);
+  const filename=S.appMode==='journal'?`noonlog_journal_${new Date().toISOString().slice(0,10)}.csv`:`noonlog_${S.activePair}_${new Date().toISOString().slice(0,10)}.csv`;
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeImgModal();closeTagModal();closeFullscreen();closeDayModal();closeNoteModal();closeTradeDetail();closeSessionModal();document.getElementById('pair-modal').classList.remove('open');}});
