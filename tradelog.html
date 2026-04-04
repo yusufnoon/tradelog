@@ -323,6 +323,106 @@ tr:last-child td{border-bottom:none}tbody tr{transition:background .1s}tbody tr:
 @media(max-width:1200px){.stats-grid{grid-template-columns:repeat(3,1fr)}.charts-row{grid-template-columns:1fr 1fr}.monthly-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}.analysis-grid{grid-template-columns:1fr}.monthly-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.sidebar{display:none}.drawer{width:100%}.monthly-grid{grid-template-columns:1fr}}
+
+/* ==================== MOBILE ==================== */
+@media(max-width:768px){
+  /* App layout */
+  .app{flex-direction:column}
+  .main{padding-bottom:70px} /* bottom nav space */
+  
+  /* Topbar mobile */
+  .topbar{padding:0 16px;height:52px}
+  .page-title{font-size:14px}
+  .topbar-right .btn-ghost:not(#csv-btn){display:none} /* sadece CSV göster */
+  
+  /* Mobile topbar menu button */
+  .mob-menu-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);cursor:pointer;color:var(--text2);flex-shrink:0}
+  .mob-menu-btn svg{width:18px;height:18px}
+  
+  /* Content padding */
+  .content{padding:14px 14px 0}
+  
+  /* Stats grid mobile */
+  .stats-grid{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .stat-card{padding:12px}
+  .stat-value{font-size:16px}
+  
+  /* Charts mobile */
+  .charts-row{grid-template-columns:1fr;gap:8px;margin-bottom:14px}
+  .chart-card{padding:12px}
+  
+  /* Table → hidden on mobile, use cards */
+  .trade-table-wrap{display:none}
+  .mobile-trade-cards{display:flex;flex-direction:column;gap:8px}
+  
+  /* Trade card */
+  .mob-trade-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:13px 14px;cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:transparent}
+  .mob-trade-card:active{border-color:var(--accent);background:var(--bg3)}
+  .mob-trade-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .mob-trade-card-left{display:flex;align-items:center;gap:8px}
+  .mob-trade-pair{font-family:var(--mono);font-size:14px;font-weight:700}
+  .mob-trade-card-right{display:flex;align-items:center;gap:7px}
+  .mob-trade-rr{font-family:var(--mono);font-size:15px;font-weight:700}
+  .mob-trade-rr.pos{color:var(--green)}.mob-trade-rr.neg{color:var(--red)}
+  .mob-trade-card-bottom{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .mob-trade-meta{font-size:11px;color:var(--text3)}
+  
+  /* Filter bar mobile */
+  .filter-bar{gap:5px;margin-bottom:10px}
+  .filter-input{width:90px;font-size:11px;padding:4px 7px}
+  .result-count{font-size:10px}
+  
+  /* Calendar mobile */
+  .cal-cell{min-height:54px;padding:4px}
+  .cal-day-num{font-size:10px}
+  .cal-trade-dot{font-size:9px;padding:1px 3px}
+  .cal-day-rr{font-size:9px}
+  
+  /* Analysis grid mobile */
+  .analysis-grid{grid-template-columns:1fr}
+  
+  /* Monthly grid mobile */
+  .monthly-grid{grid-template-columns:1fr}
+  
+  /* Drawer mobile - full screen */
+  .drawer{width:100%;border-left:none;border-top:1px solid var(--border);border-radius:var(--rl) var(--rl) 0 0;top:auto;max-height:95vh}
+  .drawer-body{padding:14px 16px}
+  .drawer-head{padding:14px 16px}
+  
+  /* FAB - floating add button */
+  .mob-fab{display:flex;position:fixed;bottom:80px;right:18px;width:54px;height:54px;background:var(--accent);border-radius:50%;align-items:center;justify-content:center;cursor:pointer;z-index:50;box-shadow:0 4px 16px rgba(0,179,119,.4);border:none;transition:transform .15s}
+  .mob-fab:active{transform:scale(.93)}
+  .mob-fab svg{width:24px;height:24px;color:#fff}
+  
+  /* Bottom navigation */
+  .mob-bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);z-index:50;height:62px;padding-bottom:env(safe-area-inset-bottom)}
+  .mob-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--text3);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;transition:color .15s;-webkit-tap-highlight-color:transparent}
+  .mob-nav-item svg{width:20px;height:20px}
+  .mob-nav-item.active{color:var(--accent)}
+  
+  /* Mobile sidebar overlay */
+  .mob-sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;opacity:0;pointer-events:none;transition:opacity .2s}
+  .mob-sidebar-overlay.open{opacity:1;pointer-events:all}
+  .mob-sidebar-panel{position:fixed;top:0;left:0;bottom:0;width:260px;background:var(--bg2);border-right:1px solid var(--border);z-index:201;transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1);overflow-y:auto}
+  .mob-sidebar-panel.open{transform:translateX(0)}
+  
+  /* Hide desktop-only elements on mobile */
+  #top-mode-badge{display:none}
+  .trade-detail-body{grid-template-columns:1fr;max-height:75vh}
+  .trade-detail-left{border-right:none;border-bottom:1px solid var(--border)}
+  
+  /* Row inputs mobile */
+  .row2{grid-template-columns:1fr 1fr}
+  .row3{grid-template-columns:1fr 1fr 1fr}
+}
+
+/* Desktop only elements */
+.mob-fab{display:none}
+.mob-bottom-nav{display:none}
+.mob-menu-btn{display:none}
+.mobile-trade-cards{display:none}
+.mob-sidebar-overlay{display:none}
+.mob-sidebar-panel{display:none}
 </style>
 </head>
 <body>
@@ -393,6 +493,7 @@ tr:last-child td{border-bottom:none}tbody tr{transition:background .1s}tbody tr:
   <div class="topbar">
     <div class="topbar-left"><span class="page-title" id="top-title">İşlem Günlüğü</span><span class="pair-badge" id="top-pair">BTCUSDT</span><span id="top-mode-badge" style="font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700;background:var(--blue-dim);color:var(--blue);border:1px solid rgba(77,159,255,.3)">BACKTEST</span></div>
     <div class="topbar-right">
+      <button class="mob-menu-btn" onclick="openMobSidebar()"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
       <button class="btn btn-ghost" onclick="exportCSV()"><svg viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 3v7M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>CSV</button>
       <button class="btn btn-primary" onclick="openAddTrade()"><svg viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>İşlem Ekle</button>
     </div>
@@ -406,9 +507,10 @@ tr:last-child td{border-bottom:none}tbody tr{transition:background .1s}tbody tr:
     </div>
     <div class="journal-view active" id="journal-view">
       <div class="filter-bar" id="filter-bar"></div>
-      <div class="table-wrap"><div class="table-container">
+      <div class="table-wrap trade-table-wrap"><div class="table-container">
         <table><thead><tr><th>Saat</th><th>Parite</th><th>Yön</th><th>RR</th><th>Sonuç</th><th>Setup</th><th>TF</th><th>Not</th><th>Görsel</th><th></th></tr></thead><tbody id="trade-tbody"></tbody></table>
       </div></div>
+      <div class="mobile-trade-cards" id="mobile-trade-cards"></div>
       <div class="monthly-section"><div class="monthly-section-title">Aylık Özet</div><div class="monthly-grid" id="monthly-grid"></div></div>
     </div>
     <div class="stats-view" id="stats-view">
@@ -528,6 +630,60 @@ tr:last-child td{border-bottom:none}tbody tr{transition:background .1s}tbody tr:
       <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeSessionModal()">İptal</button>
       <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="addSession()">Oluştur</button>
     </div>
+  </div>
+</div>
+
+<!-- MOBILE FAB -->
+<button class="mob-fab" onclick="openAddTrade()" id="mob-fab">
+  <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+</button>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mob-bottom-nav" id="mob-bottom-nav">
+  <div class="mob-nav-item active" id="mobnav-journal" onclick="setView('journal')">
+    <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M7 9h10M7 13h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Günlük
+  </div>
+  <div class="mob-nav-item" id="mobnav-stats" onclick="setView('stats')">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M3 17l4-6 4 3 4-7 4 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    İstatistik
+  </div>
+  <div class="mob-nav-item" id="mobnav-calendar" onclick="setView('calendar')">
+    <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="3" stroke="currentColor" stroke-width="1.8"/><path d="M8 2v3M16 2v3M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Takvim
+  </div>
+</nav>
+
+<!-- MOBILE SIDEBAR OVERLAY -->
+<div class="mob-sidebar-overlay" id="mob-sidebar-overlay" onclick="closeMobSidebar()"></div>
+<div class="mob-sidebar-panel" id="mob-sidebar-panel">
+  <div style="padding:16px 16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:28px;height:28px;overflow:hidden;border-radius:6px;border:1px solid rgba(0,179,119,.35)"><img src="" id="mob-sidebar-logo" style="width:28px;height:28px;object-fit:cover"></div>
+      <span style="font-family:var(--display);font-weight:700;font-size:15px">NoonLog</span>
+    </div>
+    <button onclick="closeMobSidebar()" style="background:transparent;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px">×</button>
+  </div>
+  <!-- Journal pair filter -->
+  <div style="padding:14px 14px 8px">
+    <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;font-weight:600">Parite Filtresi</div>
+    <div id="mob-journal-pair-filter" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+  </div>
+  <div style="padding:0 14px;border-top:1px solid var(--border);margin-top:8px;padding-top:14px">
+    <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;font-weight:600">Para Modu</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <span style="font-size:12px;color:var(--text2)">Bakiyeyi aktif et</span>
+      <label class="toggle-switch"><input type="checkbox" id="mob-money-toggle" onchange="toggleMoneyModeMob()"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+    </div>
+    <div id="mob-balance-wrap" style="display:none">
+      <div style="font-size:10px;color:var(--text3);margin-bottom:3px">Bakiye (USDT)</div>
+      <input class="balance-input" type="number" id="mob-balance-input" placeholder="10000" oninput="saveBalanceMob()">
+    </div>
+  </div>
+  <div style="padding:14px;border-top:1px solid var(--border);margin-top:12px">
+    <button class="btn btn-ghost" style="width:100%;justify-content:center;gap:6px" onclick="exportCSV();closeMobSidebar()">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 12h12M8 3v7M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>CSV İndir
+    </button>
   </div>
 </div>
 
@@ -803,6 +959,7 @@ function setView(v){
     const jnav=document.getElementById('jnav-'+n);if(jnav)jnav.classList.toggle('active',n===v);
   });
   document.getElementById('top-title').textContent={journal:'İşlem Günlüğü',stats:'İstatistikler',calendar:'Takvim'}[v]||'';
+  updateMobNav(v);
   renderAll();
 }
 
@@ -1285,7 +1442,115 @@ function exportCSV(){
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();URL.revokeObjectURL(url);
 }
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeImgModal();closeTagModal();closeFullscreen();closeDayModal();closeNoteModal();closeTradeDetail();closeSessionModal();document.getElementById('pair-modal').classList.remove('open');}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeImgModal();closeTagModal();closeFullscreen();closeDayModal();closeNoteModal();closeTradeDetail();closeSessionModal();document.getElementById('pair-modal').classList.remove('open');closeMobSidebar();}});
+
+// ==================== MOBILE ====================
+const isMobile=()=>window.innerWidth<=768;
+
+function openMobSidebar(){
+  document.getElementById('mob-sidebar-overlay').classList.add('open');
+  document.getElementById('mob-sidebar-panel').classList.add('open');
+  // Sync logo
+  const desktopLogo=document.querySelector('.logo-icon img');
+  if(desktopLogo)document.getElementById('mob-sidebar-logo').src=desktopLogo.src;
+  // Sync money toggle
+  document.getElementById('mob-money-toggle').checked=S.moneyMode;
+  if(S.moneyMode){document.getElementById('mob-balance-wrap').style.display='block';document.getElementById('mob-balance-input').value=S.balance||'';}
+  else document.getElementById('mob-balance-wrap').style.display='none';
+  renderMobJournalPairFilter();
+}
+function closeMobSidebar(){
+  document.getElementById('mob-sidebar-overlay').classList.remove('open');
+  document.getElementById('mob-sidebar-panel').classList.remove('open');
+}
+function toggleMoneyModeMob(){
+  S.moneyMode=document.getElementById('mob-money-toggle').checked;
+  document.getElementById('mob-balance-wrap').style.display=S.moneyMode?'block':'none';
+  document.getElementById('money-toggle').checked=S.moneyMode;
+  document.getElementById('balance-wrap').classList.toggle('show',S.moneyMode);
+  saveSettings();renderStats();
+}
+function saveBalanceMob(){
+  S.balance=parseFloat(document.getElementById('mob-balance-input').value)||0;
+  document.getElementById('balance-input').value=S.balance;
+  saveSettings();renderStats();
+}
+function renderMobJournalPairFilter(){
+  const el=document.getElementById('mob-journal-pair-filter');if(!el)return;
+  const pairs=['all',...S.journalPairs];
+  el.innerHTML=pairs.map(p=>`<button class="jpf-btn ${S.filterJournalPair===p?'active':''}" onclick="setJournalPairFilter('${p}');renderMobJournalPairFilter()">${p==='all'?'Tümü':p}</button>`).join('');
+}
+function renderMobileCards(){
+  const el=document.getElementById('mobile-trade-cards');
+  if(!el||!isMobile())return;
+  const filtered=getFiltered().slice().sort((a,b)=>(b.date+(b.time||'')).localeCompare(a.date+(a.time||'')));
+  if(!filtered.length){
+    el.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text3)"><svg width="36" height="36" viewBox="0 0 40 40" fill="none"><rect x="8" y="10" width="24" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M14 17h12M14 22h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><p style="margin-top:8px;font-size:13px">Henüz işlem yok.<br>+ butonuna bas.</p></div>`;
+    return;
+  }
+  el.innerHTML=filtered.map(t=>{
+    const rr=parseFloat(t.rr)||0;
+    const rrColor=rr>=0?'var(--green)':'var(--red)';
+    const pnl=S.moneyMode&&S.balance>0?` · ${rr>=0?'+':''}${(rr*(t.riskR||1)*(S.balance*0.01)).toFixed(0)}$`:'';
+    return`<div class="mob-trade-card" onclick="openTradeDetail(${t.id})">
+      <div class="mob-trade-card-top">
+        <div class="mob-trade-card-left">
+          <span class="mob-trade-pair">${t.pair}</span>
+          <span class="td-dir ${t.dir}" style="font-size:11px">${t.dir==='long'?'▲ L':'▼ S'}</span>
+          <span class="td-result ${t.result}" style="font-size:11px">${t.result.toUpperCase()}</span>
+        </div>
+        <div class="mob-trade-card-right">
+          <span class="mob-trade-rr ${rr>=0?'pos':'neg'}">${rr>=0?'+':''}${rr.toFixed(2)}R</span>
+        </div>
+      </div>
+      <div class="mob-trade-card-bottom">
+        <span class="mob-trade-meta">${t.date} ${t.time||''}</span>
+        ${pnl?`<span class="mob-trade-meta" style="color:${rr>=0?'var(--green)':'var(--red)'}">${pnl}</span>`:''}
+        ${(t.tags||[]).slice(0,2).map(tag=>`<span class="tag-chip" style="font-size:10px">${tag}</span>`).join('')}
+        ${t.tradeImg?`<span style="font-size:11px">📷</span>`:''}
+        ${t.note?`<span style="font-size:11px;color:var(--text3)">📝</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function updateMobNav(v){
+  ['journal','stats','calendar'].forEach(n=>{
+    const el=document.getElementById('mobnav-'+n);
+    if(el)el.classList.toggle('active',n===v);
+  });
+  // FAB only on journal view
+  const fab=document.getElementById('mob-fab');
+  if(fab)fab.style.display=(v==='journal'&&isMobile())?'flex':'none';
+}
+
+// Patch renderAll to include mobile
+const _origRenderAll=renderAll;
+function renderAll(){
+  _origRenderAll();
+  if(isMobile()){
+    renderMobileCards();
+    updateMobNav(S.activeView);
+    renderMobJournalPairFilter();
+    // Journal modunda mob sidebar'ı doğrula
+    if(S.appMode==='backtest'&&isMobile()){
+      // Backtest mobilde journal'a geç
+      setAppMode('journal');
+    }
+  }
+}
+
+// On resize
+window.addEventListener('resize',()=>{
+  if(isMobile()){
+    renderMobileCards();
+    updateMobNav(S.activeView);
+    const fab=document.getElementById('mob-fab');
+    if(fab)fab.style.display=S.activeView==='journal'?'flex':'none';
+  } else {
+    const fab=document.getElementById('mob-fab');
+    if(fab)fab.style.display='none';
+  }
+});
 function openNoteModal(id){const t=S.trades.find(t=>t.id===id);if(!t||!t.note)return;document.getElementById('note-modal-meta').innerHTML=`<span style="font-family:var(--mono);font-size:13px;font-weight:700">${t.pair}</span><span class="td-dir ${t.dir}">${t.dir==='long'?'▲ LONG':'▼ SHORT'}</span><span class="td-result ${t.result}">${t.result.toUpperCase()}</span>${t.rr?`<span style="font-family:var(--mono);font-size:13px;font-weight:600;color:${parseFloat(t.rr)>=0?'var(--green)':'var(--red)'}">${parseFloat(t.rr)>=0?'+':''}${parseFloat(t.rr).toFixed(2)}R</span>`:''}<span style="font-size:11px;color:var(--text3)">${t.date} ${t.time||''}</span>`;document.getElementById('note-modal-body').textContent=t.note;document.getElementById('note-modal').classList.add('open');}
 function closeNoteModal(){document.getElementById('note-modal').classList.remove('open');}
 </script>
